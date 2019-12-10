@@ -20,6 +20,7 @@ export class CommentFormComponent implements OnInit {
   @Input()
   set requestId(requestId: number) {
     this._requestId = requestId;
+    console.log(requestId);
 
     this.commentService.checkDuplicateComment(this.requestId).subscribe(
       (comment: any) => {

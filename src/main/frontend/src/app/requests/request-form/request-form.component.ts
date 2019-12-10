@@ -23,7 +23,8 @@ export class RequestFormComponent implements OnInit {
     this.route.params
       .subscribe(
         (params: Params) => {
-          this.index = +params.id;
+          let ids = params.id.split('|');
+          this.index = +ids[0];
           this.editMode = params.id != null;
           this.initForm();
         }
