@@ -2,6 +2,8 @@ import {Injectable} from "@angular/core";
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Subject} from "rxjs";
+import {AlertModel} from "../models/alert.model";
+import {AlertService} from "../alert/alert.service";
 
 const BACKEND_URL = environment.apiUrl + '/admin/';
 @Injectable({providedIn: 'root'})
@@ -15,7 +17,7 @@ export class AdminService {
   languages: any[] = [];
   languagesChanged = new Subject<any[]>();
 
-  constructor(private http: HttpClient){}
+  constructor(private http: HttpClient, private alertService: AlertService){}
 
   getServiceTypes() {
     return this.serviceTypes;
@@ -51,6 +53,18 @@ export class AdminService {
         (roles: any[]) => {
           this.roles = roles;
           this.rolesChanged.next([...this.roles]);
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -61,6 +75,18 @@ export class AdminService {
         (serviceTypes: any[]) => {
           this.serviceTypes = serviceTypes;
           this.serviceTypesChanged.next([...this.serviceTypes]);
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -71,6 +97,18 @@ export class AdminService {
         (languages: any[]) => {
           this.languages = languages;
           this.languagesChanged.next([...this.languages]);
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -82,6 +120,19 @@ export class AdminService {
           this.serviceTypes.push(serviceType);
           console.log(serviceType);
           this.serviceTypesChanged.next([...this.serviceTypes]);
+          this.alertService.addAlert(new AlertModel('success', 'Service Created!'));
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -92,6 +143,19 @@ export class AdminService {
         (role: any) => {
           this.roles.push(role);
           this.rolesChanged.next([...this.roles]);
+          this.alertService.addAlert(new AlertModel('success', 'Role Created!'));
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -102,6 +166,19 @@ export class AdminService {
         (language: any) => {
           this.languages.push(language);
           this.languagesChanged.next([...this.languages]);
+          this.alertService.addAlert(new AlertModel('success', 'Language Created!'));
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }

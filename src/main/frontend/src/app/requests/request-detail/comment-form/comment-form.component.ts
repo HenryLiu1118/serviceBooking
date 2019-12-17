@@ -2,6 +2,8 @@ import {Component, Input, OnInit} from '@angular/core';
 import {NgForm} from "@angular/forms";
 import {CommentService} from "../comment.service";
 import {CommentModel} from "../../../models/comment.model";
+import {AlertService} from "../../../alert/alert.service";
+import {AlertModel} from "../../../models/alert.model";
 
 @Component({
   selector: 'app-comment-form',
@@ -40,7 +42,7 @@ export class CommentFormComponent implements OnInit {
       }
     );
   }
-  constructor(private commentService: CommentService) { }
+  constructor(private commentService: CommentService, private alertService: AlertService) { }
 
   ngOnInit() {
   }
@@ -61,6 +63,19 @@ export class CommentFormComponent implements OnInit {
           comment.requestUser,
           comment.userdto
         );
+        this.alertService.addAlert(new AlertModel('success', 'Comment Posted!'));
+      },
+      err => {
+        const errors = err.error.errors;
+        if (errors) {
+          for (let error of errors) {
+            this.alertService.addAlert(new AlertModel('danger', error));
+          }
+        }
+        const error = err.error.error;
+        if (error) {
+          this.alertService.addAlert(new AlertModel('danger', error))
+        }
       }
     );
   }

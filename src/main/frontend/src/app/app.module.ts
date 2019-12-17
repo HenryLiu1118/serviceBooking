@@ -33,6 +33,7 @@ import { RolesFormComponent } from './admin/roles/roles-form/roles-form.componen
 import { LanguagesComponent } from './admin/languages/languages.component';
 import { LanguagesListComponent } from './admin/languages/languages-list/languages-list.component';
 import { LanguagesFormComponent } from './admin/languages/languages-form/languages-form.component';
+import { AlertComponent } from './alert/alert.component';
 
 @NgModule({
   declarations: [
@@ -63,7 +64,8 @@ import { LanguagesFormComponent } from './admin/languages/languages-form/languag
     RolesFormComponent,
     LanguagesComponent,
     LanguagesListComponent,
-    LanguagesFormComponent
+    LanguagesFormComponent,
+    AlertComponent
   ],
   imports: [
     BrowserModule,

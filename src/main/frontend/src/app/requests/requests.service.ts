@@ -3,9 +3,11 @@ import {environment} from "../../environments/environment";
 import {RequestModel} from "../models/request.model";
 import {Subject} from "rxjs";
 import {HttpClient} from "@angular/common/http";
-import {ActivatedRoute, Router} from "@angular/router";
+import {Router} from "@angular/router";
 import {AuthService} from "../auth/auth.service";
 import {map} from "rxjs/operators";
+import {AlertService} from "../alert/alert.service";
+import {AlertModel} from "../models/alert.model";
 
 const BACKEND_URL = environment.apiUrl + '/request/';
 
@@ -14,7 +16,7 @@ export class RequestsService {
   private requests: RequestModel[] = [];
   private reqestsChanged = new Subject<{requests: RequestModel[], size: number}>();
 
-  constructor(private authService: AuthService, private http: HttpClient, private router: Router){}
+  constructor(private authService: AuthService, private http: HttpClient, private router: Router, private alertService:AlertService){}
 
   getRequestsChanged() {
     return this.reqestsChanged.asObservable();
@@ -70,6 +72,25 @@ export class RequestsService {
             requests: [...this.requests],
             size: transformedRequests.size
           });
+          if (page === 0) {
+            if (transformedRequests.size > 0) {
+              this.alertService.addAlert(new AlertModel('success', 'Total ' + transformedRequests.size + ' found!'));
+            } else {
+              this.alertService.addAlert(new AlertModel('warning', 'Found 0!'));
+            }
+          }
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -93,7 +114,20 @@ export class RequestsService {
             requests: [...this.requests],
             size: this.requests.length
           });
+          this.alertService.addAlert(new AlertModel('success', 'Request Posted!'));
           this.router.navigateByUrl('/requests');
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -118,7 +152,20 @@ export class RequestsService {
             requests: [...this.requests],
             size: this.requests.length
           });
+          this.alertService.addAlert(new AlertModel('success', 'Request Updated Successfully!'));
           this.router.navigateByUrl('/requests');
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }

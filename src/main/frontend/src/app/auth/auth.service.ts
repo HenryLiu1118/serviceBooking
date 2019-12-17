@@ -8,6 +8,8 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {UserInfoModel} from "../dashboard/UserInfo.model";
 import {ProvideService} from "../provides/provide.service";
 import {map} from "rxjs/operators";
+import {AlertService} from "../alert/alert.service";
+import {AlertModel} from "../models/alert.model";
 
 const BACKEND_URL = environment.apiUrl + '/users/';
 
@@ -18,7 +20,7 @@ export class AuthService {
   private token: string = '';
   private user: UserModel = null;
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private provideService: ProvideService){}
+  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private provideService: ProvideService, private alertService: AlertService){}
 
   getToken() {
     return this.token;
@@ -42,7 +44,41 @@ export class AuthService {
       .subscribe(
         response => {
           this.token = response.token;
+          localStorage.setItem('token', this.token);
           this.user = response.user;
+          this.isAuthenticated = true;
+          if (this.user.role == 'Service') {
+            this.provideService.getMyProvideFromAPI();
+          }
+          this.authStatusListener.next(this.isAuthenticated);
+          this.alertService.addAlert(new AlertModel('success', 'Login Successfully!'));
+          this.router.navigate(['/dashboard/profile'], {relativeTo: this.route});
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
+          this.authStatusListener.next(false);
+        }
+      );
+  }
+
+  loadUser() {
+    if (localStorage.getItem('token')) {
+      this.token = localStorage.getItem('token');
+    }
+
+    this.http.get<UserModel>(environment.apiUrl + '/userinfo/me')
+      .subscribe(
+        response => {
+          this.user = response;
           this.isAuthenticated = true;
           if (this.user.role == 'Service') {
             this.provideService.getMyProvideFromAPI();
@@ -50,15 +86,15 @@ export class AuthService {
           this.authStatusListener.next(this.isAuthenticated);
           this.router.navigate(['/dashboard/profile'], {relativeTo: this.route});
         },
-        error => {
-          console.log(error);
-          this.authStatusListener.next(false);
+        err => {
+
         }
       );
   }
 
   logout() {
     this.user = null;
+    localStorage.removeItem('token');
     this.isAuthenticated = false;
     this.provideService.clearMyProvide();
     this.authStatusListener.next(this.isAuthenticated);
@@ -70,10 +106,20 @@ export class AuthService {
       .subscribe(
         response => {
           console.log(response.message);
+          this.alertService.addAlert(new AlertModel('success', 'Account Created!'));
           this.router.navigate(["/auth/login"]);
         },
-        error => {
-          console.log("Error");
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
           this.authStatusListener.next(false);
         }
       );
@@ -85,7 +131,20 @@ export class AuthService {
         user => {
           this.user = user;
           this.authStatusListener.next(true);
+          this.alertService.addAlert(new AlertModel('success', 'Account Updated!'));
           this.router.navigate(['/dashboard/profile'], {relativeTo: this.route});
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }

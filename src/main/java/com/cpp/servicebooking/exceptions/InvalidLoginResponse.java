@@ -1,6 +1,21 @@
 package com.cpp.servicebooking.exceptions;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Builder
+@Data
+@AllArgsConstructor
 public class InvalidLoginResponse {
+    private String error;
+    private boolean success;
+
+    public InvalidLoginResponse() {
+        this.error = "Invalid Credentials";
+        this.success = false;
+    }
+    /*
     private String username;
     private String password;
 
@@ -24,4 +39,5 @@ public class InvalidLoginResponse {
     public void setPassword(String password) {
         this.password = password;
     }
+    */
 }

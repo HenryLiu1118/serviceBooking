@@ -5,6 +5,8 @@ import {HttpClient} from "@angular/common/http";
 import {CommentModel} from "../../models/comment.model";
 import {Subject} from "rxjs";
 import {map} from "rxjs/operators";
+import {AlertModel} from "../../models/alert.model";
+import {AlertService} from "../../alert/alert.service";
 
 const BACKEND_URL = environment.apiUrl + '/comment/';
 
@@ -13,7 +15,7 @@ export class CommentService {
   private comments = [];
   private commentsChanged = new Subject<CommentModel[]>();
 
-  constructor(private http: HttpClient, private router: Router){}
+  constructor(private http: HttpClient, private router: Router, private alertService: AlertService){}
 
   getComments() {
     return this.comments;
@@ -52,6 +54,18 @@ export class CommentService {
         transformedComments => {
           this.comments = transformedComments;
           this.commentsChanged.next([...this.comments]);
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }

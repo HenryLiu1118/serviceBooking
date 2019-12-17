@@ -5,6 +5,8 @@ import {ServiceProvideModel} from "../models/serviceProvide.model";
 import {Subject} from "rxjs";
 import {environment} from "../../environments/environment";
 import {map} from "rxjs/operators";
+import {AlertService} from "../alert/alert.service";
+import {AlertModel} from "../models/alert.model";
 
 const BACKEND_URL = environment.apiUrl + '/provider/';
 
@@ -15,11 +17,7 @@ export class ProvideService {
   private myProvide: ServiceProvideModel;
   private myProvideChanged = new Subject<ServiceProvideModel>();
 
-  constructor(private http: HttpClient, private router: Router){}
-
-  getProvides() {
-    return this.provides;
-  }
+  constructor(private http: HttpClient, private router: Router, private alertService:AlertService){}
 
   getProvidesChanged() {
     return this.providesChanged.asObservable();
@@ -82,6 +80,25 @@ export class ProvideService {
             provides: [...this.provides],
             size: transformedProvides.size
           });
+          if (page === 0) {
+            if (transformedProvides.size > 0) {
+              this.alertService.addAlert(new AlertModel('success', 'Total ' + transformedProvides.size + ' found!'));
+            } else {
+              this.alertService.addAlert(new AlertModel('warning', 'Found 0!'));
+            }
+          }
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -112,6 +129,18 @@ export class ProvideService {
         transformedProvide => {
           this.myProvide = transformedProvide;
           this.myProvideChanged.next(this.myProvide);
+        },
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
@@ -131,10 +160,20 @@ export class ProvideService {
           );
           this.myProvide = newProvide;
           this.myProvideChanged.next(this.myProvide);
+          this.alertService.addAlert(new AlertModel('success', 'Service Updated Successfully!'));
           this.router.navigateByUrl('/dashboard/profile');
         },
-        error => {
-          console.log(error);
+        err => {
+          const errors = err.error.errors;
+          if (errors) {
+            for (let error of errors) {
+              this.alertService.addAlert(new AlertModel('danger', error));
+            }
+          }
+          const error = err.error.error;
+          if (error) {
+            this.alertService.addAlert(new AlertModel('danger', error))
+          }
         }
       );
   }
