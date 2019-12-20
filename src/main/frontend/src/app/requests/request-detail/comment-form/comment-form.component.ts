@@ -12,8 +12,8 @@ import {AlertModel} from "../../../models/alert.model";
 })
 export class CommentFormComponent implements OnInit {
 
-  private _requestId: number;
-  private comment: CommentModel;
+  _requestId: number;
+  comment: CommentModel;
 
   get requestId(): number {
     return this._requestId;

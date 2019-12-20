@@ -20,11 +20,14 @@ export class RequestFormComponent implements OnInit {
   constructor(private requestService: RequestsService, private route: ActivatedRoute, private authService: AuthService) { }
 
   ngOnInit() {
+    this.initForm();
     this.route.params
       .subscribe(
         (params: Params) => {
-          let ids = params.id.split('|');
-          this.index = +ids[0];
+          if (params.id) {
+            let ids = params.id.split('|');
+            this.index = +ids[0];
+          }
           this.editMode = params.id != null;
           this.initForm();
         }
