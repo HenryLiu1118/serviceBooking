@@ -118,7 +118,6 @@ export class AdminService {
       .subscribe(
         (serviceType: any) => {
           this.serviceTypes.push(serviceType);
-          console.log(serviceType);
           this.serviceTypesChanged.next([...this.serviceTypes]);
           this.alertService.addAlert(new AlertModel('success', 'Service Created!'));
         },

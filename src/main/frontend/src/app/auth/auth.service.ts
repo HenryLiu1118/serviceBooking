@@ -126,7 +126,7 @@ export class AuthService {
   }
 
   updateProfile(profileData: UserInfoModel) {
-    this.http.put<UserModel>('http://localhost:8080/api/userinfo', profileData)
+    this.http.put<UserModel>(environment.apiUrl + '/userinfo', profileData)
       .subscribe(
         user => {
           this.user = user;
