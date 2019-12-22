@@ -62,8 +62,8 @@ export class ProvideListComponent implements OnInit, OnDestroy {
   }
 
   onSelect() {
-    this.onCallAPI();
     this.page = 0;
+    this.onCallAPI();
   }
 
   onPre() {

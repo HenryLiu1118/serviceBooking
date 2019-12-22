@@ -61,8 +61,8 @@ export class RequestListComponent implements OnInit, OnDestroy {
   }
 
   onSelect() {
-    this.onCallAPI();
     this.page = 0;
+    this.onCallAPI();
   }
 
   onCallAPI() {
