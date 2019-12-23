@@ -11,6 +11,7 @@ import {Router} from "@angular/router";
   styleUrls: ['./provide-list.component.css']
 })
 export class ProvideListComponent implements OnInit, OnDestroy {
+  private provideListLoading: boolean = false;
 
   provides: ServiceProvideModel[] = [];
   providesSub: Subscription;
@@ -30,7 +31,14 @@ export class ProvideListComponent implements OnInit, OnDestroy {
   constructor(private provideService: ProvideService, private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
-    this.onCallAPI();
+    this.provideTypes = ['All', ...this.authService.getServiceTypes()];
+    this.languages = ['All', ...this.authService.getLanguages()];
+
+    this.provides = this.provideService.getProvides();
+    if (this.provides.length == 0) {
+      this.onSelect();
+    }
+
     this.providesSub = this.provideService.getProvidesChanged()
       .subscribe(
         (providesData: {provides: ServiceProvideModel[], size: number}) => {
@@ -38,25 +46,15 @@ export class ProvideListComponent implements OnInit, OnDestroy {
           this.size = providesData.size;
           this.pageNumber = Math.ceil(this.size / this.limit);
           this.pageNumberlist = [...Array(this.pageNumber).keys()];
+          this.provideListLoading = false;
         }
       );
 
-    this.authService.getProvideTypes()
-      .subscribe(
-        provideTypes => {
-          this.provideTypes = ['All', ...provideTypes];
-        }
-      );
 
-    this.authService.getLanguages()
-      .subscribe(
-        languages => {
-          this.languages = ['All', ...languages];
-        }
-      );
   }
 
   onCallAPI() {
+    this.provideListLoading = true;
     this.provideService.getProvidesFromAPI(this.provideType, this.language, this.page, this.limit);
     this.router.navigate(['/provides'], { replaceUrl: true });
   }

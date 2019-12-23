@@ -1,4 +1,7 @@
-<div class="container center_div">
+<div *ngIf="myProvideLoading">
+  <h1>Loading...</h1>
+</div>
+<div class="container center_div" *ngIf="!myProvideLoading">
   <form [formGroup]="provideForm" (ngSubmit)="onSubmit()" class="px-3 py-4 form_border bg-white">
     <h1 class="font_color pt-3 pb-2">Update Service</h1>
     <hr/>

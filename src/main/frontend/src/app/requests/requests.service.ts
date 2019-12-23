@@ -18,6 +18,10 @@ export class RequestsService {
 
   constructor(private authService: AuthService, private http: HttpClient, private router: Router, private alertService:AlertService){}
 
+  getRequests() {
+    return this.requests;
+  }
+
   getRequestsChanged() {
     return this.reqestsChanged.asObservable();
   }

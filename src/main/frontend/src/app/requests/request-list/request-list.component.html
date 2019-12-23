@@ -1,4 +1,7 @@
-<div>
+<div *ngIf="requesrListLoading">
+  <h1>Loading...</h1>
+</div>
+<div *ngIf="!requesrListLoading">
   <div class="text-left">
     <button (click)="onNewRequest()" *ngIf="user.role == 'Customer'" class="btn btn_background text-white" id="post_button">Post New Request</button>
   </div>

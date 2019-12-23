@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {NgForm} from "@angular/forms";
 import {AuthService} from "../auth.service";
 import {RegisterDataModel} from "../register-data.model";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-signup',
@@ -13,20 +14,16 @@ export class SignupComponent implements OnInit {
   roles: string[] = [];
   languages: string[] = [];
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
-    this.authService.getRoles().subscribe(
-      (roles: string[]) => {
-        this.roles = roles;
-      }
-    );
+    this.roles = this.authService.getRoles();
+    this.languages = this.authService.getLanguages();
 
-    this.authService.getLanguages().subscribe(
-      (languages: any[]) => {
-        this.languages = languages;
-      }
-    );
+    if (localStorage.getItem('token')) {
+      this.router.navigateByUrl('/auth/login');
+    }
+
   }
 
   onSubmit(form: NgForm) {

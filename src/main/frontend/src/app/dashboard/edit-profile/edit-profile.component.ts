@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../auth/auth.service";
@@ -11,17 +11,22 @@ import {UserInfoModel} from "../UserInfo.model";
   templateUrl: './edit-profile.component.html',
   styleUrls: ['./edit-profile.component.css']
 })
-export class EditProfileComponent implements OnInit {
+export class EditProfileComponent implements OnInit, OnDestroy {
   profileForm: FormGroup;
   private authListenerSubs: Subscription;
   user: UserModel;
   languages: string[] = [];
 
+  private authLoadingSubs: Subscription;
+  private authLoading: boolean = false;
+
   constructor(private router: Router, private authService: AuthService, private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.user = this.authService.getUser();
+    this.languages = this.authService.getLanguages();
     this.initForm();
+
     this.authListenerSubs = this.authService.getAuthStatusListener()
       .subscribe(
         response => {
@@ -30,10 +35,10 @@ export class EditProfileComponent implements OnInit {
         }
       );
 
-    this.authService.getLanguages()
+    this.authLoadingSubs = this.authService.getDataLoadingListener()
       .subscribe(
-        languages => {
-          this.languages = languages;
+        loading => {
+          this.authLoading = loading;
         }
       );
   }
@@ -83,5 +88,9 @@ export class EditProfileComponent implements OnInit {
       this.profileForm.value.language,
     );
     this.authService.updateProfile(registerData);
+  }
+
+  ngOnDestroy(): void {
+    this.authLoadingSubs.unsubscribe();
   }
 }

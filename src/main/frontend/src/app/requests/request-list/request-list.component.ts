@@ -13,6 +13,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 })
 export class RequestListComponent implements OnInit, OnDestroy {
   user: UserModel;
+  private requesrListLoading: boolean = false;
 
   requests: RequestModel[] = [];
   private requestSub: Subscription;
@@ -33,8 +34,11 @@ export class RequestListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.user = this.authService.getUser();
+    this.provideTypes = ['All', ...this.authService.getServiceTypes()];
+    this.languages = ['All', ...this.authService.getLanguages()];
 
     this.onSelect();
+
     this.requestSub = this.requestService.getRequestsChanged()
       .subscribe(
         (requestData: {requests: RequestModel[], size: number}) => {
@@ -42,20 +46,7 @@ export class RequestListComponent implements OnInit, OnDestroy {
           this.size = requestData.size;
           this.pageNumber = Math.ceil(this.size / this.limit);
           this.pageNumberlist = [...Array(this.pageNumber).keys()];
-        }
-      );
-
-    this.authService.getProvideTypes()
-      .subscribe(
-        provideTypes => {
-          this.provideTypes = ['All', ...provideTypes];
-        }
-      );
-
-    this.authService.getLanguages()
-      .subscribe(
-        languages => {
-          this.languages = ['All', ...languages];
+          this.requesrListLoading = false;
         }
       );
   }
@@ -66,6 +57,7 @@ export class RequestListComponent implements OnInit, OnDestroy {
   }
 
   onCallAPI() {
+    this.requesrListLoading = true;
     this.requestService.getRequestsFromAPI(this.provideType, this.language, this.page, this.limit);
     this.router.navigate(['/requests'], { replaceUrl: true });
   }

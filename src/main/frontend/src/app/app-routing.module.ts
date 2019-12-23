@@ -19,7 +19,7 @@ import {LanguagesComponent} from "./admin/languages/languages.component";
 
 
 const routes: Routes = [
-  {path: '', redirectTo: 'dashboard/profile', pathMatch: 'full'},
+  {path: '', redirectTo: 'auth/login', pathMatch: 'full'},
   {path: 'dashboard/profile', component: ProfileComponent, canActivate: [AuthGuard]},
   {path: 'dashboard/editProfile', component: EditProfileComponent, canActivate: [AuthGuard]},
   {path: 'dashboard/editService', component: EditProfileServiceComponent, canActivate:[AuthGuard, ProvideGuard]},

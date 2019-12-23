@@ -1,4 +1,7 @@
-<div class="container bg-white shadow-sm">
+<div *ngIf="newRequestLoading">
+  <h1>Loading...</h1>
+</div>
+<div class="container bg-white shadow-sm" *ngIf="!newRequestLoading">
   <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="px-3 py-3">
     <h2 *ngIf="!editMode" class="text-center font_color py-3">Post New Request</h2>
     <h2 *ngIf="editMode" class="text-center font_color py-3">Update Request</h2>

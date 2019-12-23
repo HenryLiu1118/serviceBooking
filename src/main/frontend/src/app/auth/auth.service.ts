@@ -19,6 +19,13 @@ export class AuthService {
   private authStatusListener = new Subject<boolean>();
   private token: string = '';
   private user: UserModel = null;
+  private authLoadingListener = new Subject<boolean>();
+
+  //global list
+  private roles: string[] = [];
+  private languages: string[] = [];
+  private serviceTypes: string[] = [];
+  private dataLoadingStatusListener = new Subject<boolean>();
 
   constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private provideService: ProvideService, private alertService: AlertService){}
 
@@ -38,7 +45,24 @@ export class AuthService {
     return this.user;
   }
 
+  getLanguages() {
+    return this.languages;
+  }
+
+  getRoles() {
+    return this.roles;
+  }
+
+  getServiceTypes() {
+    return this.serviceTypes;
+  }
+
+  getDataLoadingListener() {
+    return this.authLoadingListener.asObservable();
+  }
+
   login(username: string, password: string) {
+    this.authLoadingListener.next(true);
     const authData = {username: username, password: password};
     this.http.post<{token: string, user: UserModel}>(BACKEND_URL + 'login', authData)
       .subscribe(
@@ -47,30 +71,32 @@ export class AuthService {
           localStorage.setItem('token', this.token);
           this.user = response.user;
           this.isAuthenticated = true;
-          if (this.user.role == 'Service') {
-            this.provideService.getMyProvideFromAPI();
-          }
           this.authStatusListener.next(this.isAuthenticated);
+          this.authLoadingListener.next(false);
           this.alertService.addAlert(new AlertModel('success', 'Login Successfully!'));
           this.router.navigate(['/dashboard/profile'], {relativeTo: this.route});
         },
         err => {
-          const errors = err.error.errors;
-          if (errors) {
-            for (let error of errors) {
-              this.alertService.addAlert(new AlertModel('danger', error));
+          if (err.error) {
+            const errors = err.error.errors;
+            if (errors) {
+              for (let error of errors) {
+                this.alertService.addAlert(new AlertModel('danger', error));
+              }
+            }
+            const error = err.error.error;
+            if (error) {
+              this.alertService.addAlert(new AlertModel('danger', error))
             }
           }
-          const error = err.error.error;
-          if (error) {
-            this.alertService.addAlert(new AlertModel('danger', error))
-          }
           this.authStatusListener.next(false);
+          this.authLoadingListener.next(false);
         }
       );
   }
 
   loadUser() {
+    this.authLoadingListener.next(true);
     if (localStorage.getItem('token')) {
       this.token = localStorage.getItem('token');
     }
@@ -80,14 +106,12 @@ export class AuthService {
         response => {
           this.user = response;
           this.isAuthenticated = true;
-          if (this.user.role == 'Service') {
-            this.provideService.getMyProvideFromAPI();
-          }
           this.authStatusListener.next(this.isAuthenticated);
+          this.authLoadingListener.next(false);
           this.router.navigate(['/dashboard/profile'], {relativeTo: this.route});
         },
         err => {
-
+          this.authLoadingListener.next(false);
         }
       );
   }
@@ -95,6 +119,7 @@ export class AuthService {
   logout() {
     this.user = null;
     localStorage.removeItem('token');
+    this.token = '';
     this.isAuthenticated = false;
     this.provideService.clearMyProvide();
     this.authStatusListener.next(this.isAuthenticated);
@@ -102,10 +127,11 @@ export class AuthService {
   }
 
   signup(registerData: RegisterDataModel) {
+    this.authLoadingListener.next(true);
     this.http.post<{message: string}>(BACKEND_URL + 'register', registerData)
       .subscribe(
         response => {
-          console.log(response.message);
+          this.authLoadingListener.next(false);
           this.alertService.addAlert(new AlertModel('success', 'Account Created!'));
           this.router.navigate(["/auth/login"]);
         },
@@ -121,16 +147,19 @@ export class AuthService {
             this.alertService.addAlert(new AlertModel('danger', error))
           }
           this.authStatusListener.next(false);
+          this.authLoadingListener.next(false);
         }
       );
   }
 
   updateProfile(profileData: UserInfoModel) {
+    this.authLoadingListener.next(true);
     this.http.put<UserModel>(environment.apiUrl + '/userinfo', profileData)
       .subscribe(
         user => {
           this.user = user;
           this.authStatusListener.next(true);
+          this.authLoadingListener.next(false);
           this.alertService.addAlert(new AlertModel('success', 'Account Updated!'));
           this.router.navigate(['/dashboard/profile'], {relativeTo: this.route});
         },
@@ -145,12 +174,16 @@ export class AuthService {
           if (error) {
             this.alertService.addAlert(new AlertModel('danger', error))
           }
+          this.authLoadingListener.next(false);
         }
       );
   }
 
-  getRoles() {
-    return this.http.get(BACKEND_URL + 'role')
+  initDataFromAPI() {
+    this.dataLoadingStatusListener.next(true);
+    let tempCnt = 0;
+
+    this.http.get(BACKEND_URL + 'role')
       .pipe(
         map(
           (roles: any[]) => {
@@ -161,11 +194,19 @@ export class AuthService {
             );
           }
         )
+      )
+      .subscribe(
+        (roles: string[]) => {
+          this.roles = roles;
+          tempCnt++;
+          this.dataLoadingStatusListener.next(tempCnt !== 3);
+        },err => {
+          tempCnt++;
+          this.dataLoadingStatusListener.next(tempCnt !== 3);
+        }
       );
-  }
 
-  getProvideTypes() {
-    return this.http.get(BACKEND_URL + 'serviceType')
+    this.http.get(BACKEND_URL + 'serviceType')
       .pipe(
         map(
           (provideTypes: any[]) => {
@@ -176,11 +217,19 @@ export class AuthService {
             );
           }
         )
+      )
+      .subscribe(
+        (serviceTypes: string[]) => {
+          this.serviceTypes = serviceTypes;
+          tempCnt++;
+          this.dataLoadingStatusListener.next(tempCnt !== 3);
+        }, err => {
+          tempCnt++;
+          this.dataLoadingStatusListener.next(tempCnt !== 3);
+        }
       );
-  }
 
-  getLanguages() {
-    return this.http.get(BACKEND_URL + 'language')
+    this.http.get(BACKEND_URL + 'language')
       .pipe(
         map(
           (languages: any[]) => {
@@ -191,6 +240,16 @@ export class AuthService {
             );
           }
         )
+      )
+      .subscribe(
+        (languages: string[]) => {
+          this.languages = languages;
+          tempCnt++;
+          this.dataLoadingStatusListener.next(tempCnt !== 3);
+        }, err => {
+          tempCnt++;
+          this.dataLoadingStatusListener.next(tempCnt !== 3);
+        }
       );
   }
 }

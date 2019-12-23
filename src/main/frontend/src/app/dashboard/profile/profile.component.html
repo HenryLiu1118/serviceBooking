@@ -1,5 +1,8 @@
 <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-<div class="card center_div">
+<div *ngIf="dataLoading">
+  <h1>Loading...</h1>
+</div>
+<div class="card center_div" *ngIf="!dataLoading">
   <div class="card-header card_header_color text-white">
     My Dashboard
   </div>
@@ -28,26 +31,31 @@
     </div>
     <!--Service-->
     <div *ngIf="user.role == 'Service'" class="card-body">
-      <div *ngIf="myProvide != null">
-        <div class="row">
-          <div class="col-3">
-            <div class="h6 pt-3">Service type:</div>
-            <div class="h6 pt-4">Price:</div>
-            <div class="h6 pt-4">Detail:</div>
-          </div>
-          <div class="col">
-            <div class="h6 pt-3 text-secondary">{{myProvide.servicetype}}</div>
-            <div class="h6 pt-4 text-secondary">{{myProvide.price}}</div>
-            <div class="h6 pt-4 text-secondary">{{myProvide.detail}}</div>
+      <div *ngIf="myProvideLoading">
+        <div>Service information Loading...</div>
+      </div>
+      <div *ngIf="!myProvideLoading">
+        <div *ngIf="myProvide != null">
+          <div class="row">
+            <div class="col-3">
+              <div class="h6 pt-3">Service type:</div>
+              <div class="h6 pt-4">Price:</div>
+              <div class="h6 pt-4">Detail:</div>
+            </div>
+            <div class="col">
+              <div class="h6 pt-3 text-secondary">{{myProvide.servicetype}}</div>
+              <div class="h6 pt-4 text-secondary">{{myProvide.price}}</div>
+              <div class="h6 pt-4 text-secondary">{{myProvide.detail}}</div>
+            </div>
           </div>
         </div>
+        <div *ngIf="myProvide == null" class="text-danger text-center pt-3">
+          Please fill your service information.
+        </div>
+        <div *ngIf="user.role == 'Service'" class="text-right pt-4">
+          <button type="button" class="btn btn_background text-light btn-sm py-1 px-2" (click)="onServiceUpdate()">Update my Service</button>
+        </div>
       </div>
-      <div *ngIf="myProvide == null" class="text-danger text-center pt-3">
-        Please fill your service information.
-      </div>
-    </div>
-    <div *ngIf="user.role == 'Service'" class="text-right pt-4">
-      <button type="button" class="btn btn_background text-light btn-sm py-1 px-2" (click)="onServiceUpdate()">Update my Service</button>
     </div>
   </div>
 </div>

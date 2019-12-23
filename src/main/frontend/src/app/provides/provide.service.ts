@@ -19,6 +19,10 @@ export class ProvideService {
 
   constructor(private http: HttpClient, private router: Router, private alertService:AlertService){}
 
+  getProvides() {
+    return this.provides;
+  }
+
   getProvidesChanged() {
     return this.providesChanged.asObservable();
   }

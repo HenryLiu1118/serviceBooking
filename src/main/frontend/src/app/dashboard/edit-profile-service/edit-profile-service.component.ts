@@ -16,12 +16,14 @@ export class EditProfileServiceComponent implements OnInit, OnDestroy {
   myProvide: ServiceProvideModel;
   private provideListenerSubs: Subscription;
   provideTypes: string[] = [];
+  private myProvideLoading: boolean = false;
 
   constructor(private authService: AuthService, private provideService: ProvideService) { }
 
   ngOnInit() {
     this.myProvide = this.provideService.getMyProvide();
     this.editMode = this.myProvide != null;
+    this.provideTypes = this.authService.getServiceTypes();
     this.initForm();
 
     this.provideListenerSubs = this.provideService.getProvideStatusListener()
@@ -30,13 +32,7 @@ export class EditProfileServiceComponent implements OnInit, OnDestroy {
           this.myProvide = provide;
           this.editMode = this.myProvide != null;
           this.initForm();
-        }
-      );
-
-    this.authService.getProvideTypes()
-      .subscribe(
-        provideTypes => {
-          this.provideTypes = provideTypes;
+          this.myProvideLoading = false;
         }
       );
 
@@ -61,6 +57,7 @@ export class EditProfileServiceComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
+    this.myProvideLoading = true;
     this.provideService.updateService(this.provideForm.value.detail, this.provideForm.value.price, this.provideForm.value.servicetype);
   }
 
