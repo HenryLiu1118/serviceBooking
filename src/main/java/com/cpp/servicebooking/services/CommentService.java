@@ -82,7 +82,7 @@ public class CommentService {
 
         RequestOrder requestOrder = comment.getRequestOrder();
 
-        if (!comment.getUser().getUsername().equals(name) || !!comment.getUser().getUsername().equals(requestOrder.getUser().getUsername())) {
+        if (!comment.getUser().getUsername().equals(name) && !comment.getUser().getUsername().equals(requestOrder.getUser().getUsername())) {
             throw new CommentNotFoundException("You cannot view this comment");
         }
         return comment;
